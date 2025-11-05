@@ -743,6 +743,58 @@ section.Top {
 }
 
 
+
+/* --- YouTube embeds fix & grid style --- */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.video-item {
+  position: relative;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.video-item img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+
+.video-item:hover img {
+  transform: scale(1.03);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: white;
+  opacity: 0.8;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.video-item:hover .play-overlay {
+  opacity: 1;
+}
+
+.video-item h4 {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #fff;
+}
+
+
+
+
 /* Contact Me */
 
 section.contact-me {
