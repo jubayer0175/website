@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900"
+      rel="stylesheet"
+    />
+
+    <title>Jubayer's personal website</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="../assets/css/fontawesome.css" />
+    <link rel="stylesheet" href="../assets/css/templatemo-style.css" />
+    <link rel="stylesheet" href="../assets/css/owl.css" />
+    <link rel="stylesheet" href="../assets/css/lightbox.css" />
+  </head>
+
+  <body>
+    <div id="page-wraper">
+      <!-- Sidebar Menu -->
+      <div class="responsive-nav">
+        <i class="fa fa-bars" id="menu-toggle"></i>
+        <div id="menu" class="menu">
+          <i class="fa fa-times" id="menu-close"></i>
+          <div class="container">
+            <div class="image">
+              <a href="#"><img src="../assets/images/jubayer.png" alt="" /></a>
+            </div>
+                        <div class="author-content">
+              <h4>Jubayer Mahmod</h4>
+              <span> jubayeramahmod@gmail.com</span>
+               <br> Shipyard Innovation lab
+               <br> Amazon HQ1, Seattle
+                <br> Washington, USA   
+            </div>
+
+            <div class="social-network">
+              <ul class="soial-icons">
+                <li>
+                  <a href="https://twitter.com/jubayer0175"><img src="../assets/img/Twitter_Bird.png"></a>
+                </li>
+                <li>
+                  <a href="https://scholar.google.com/citations?user=VAryC0sAAAAJ&hl=en&inst=13410158990364976897"><img src="../assets/img/icons8-google-scholar-480.png" alt="google scholar"></a>
+                </li>
+                <li>
+                  <a href="https://github.com/jubayer0175"><img src="../assets/img/Octocat.png"></a>
+                </li>
+
+                <li>
+                  <a href="./assets/docs/resume.pdf" download> <img src="../assets/images/cv.png">  </a>
+                </li>
+                <!-- <li>
+                  <a href="#"><i class="fa fa-rss"></i></a>
+                </li> -->
+              </ul>
+            </div>
+
+
+            <nav class="main-nav" role="navigation">
+              <ul class="main-menu">
+                <li> <a href="../index.html#voltboot">Home </a></li>
+
+              </ul>
+            </nav>
+
+            
+          </div>
+        </div>
+      </div>
+
+
+      <section class="section projects" data-section="Top">
+        <div class="container">
+          <div class="section-heading">
+            <h4>Why Cheap IoT Breaks Trust: BSides Seattle 2026 hardware CTF deeper dive</h4>
+          </div>
+<p>
+<p>
+If you are reading this, you likely participated in the BSides Seattle 2026 Hardware Hacking Lab—a CTF-style hands-on exercise that I designed together with Vraj and Khyati. While the lab focused on practical interaction with a real embedded device, its purpose extended far beyond completing technical challenges or capturing flags. This article steps back from the hands-on experience to explain the larger security concepts you actually explored.
+</p>
+
+<p>
+After completing the lab, it may seem that the primary accomplishment was gaining access to a router—connecting through UART, dumping flash memory, extracting a password from firmware, and modifying the device to boot your own changes. In reality, these actions collectively formed a practical evaluation of one of the most fundamental questions in system security:
+</p>
+
+<p><strong>Can a device prove that the software it executes is authentic?</strong></p>
+
+<p>
+The exercises were not merely about hacking a router. They were designed to expose how trust is established—or silently fails—inside modern embedded systems. What you performed was an empirical examination of execution authority, secret protection, and the presence (or absence) of a hardware root of trust.
+</p>
+</p>
+
+<p>
+Modern computing security ultimately depends on control over execution. Encryption, authentication, and access control mechanisms assume that trusted software is running on trusted hardware. If firmware itself can be replaced, higher-layer defenses lose meaning. The exercises performed during this lab systematically evaluated whether such architectural guarantees existed in a commodity embedded device.
+</p>
+
+<h5>Observing Trust Formation</h5>
+
+<p>
+The first interaction with the device occurred through the UART interface during system boot. At this stage, the processor initializes memory and prepares execution before any operating system protections are active. This phase determines what software the device ultimately trusts.
+</p>
+
+<p>
+Secure systems treat early boot stages as critical security boundaries. Debug interfaces are typically restricted or permanently disabled in production devices because control during boot implies control over the entire platform. The unrestricted UART console revealed that this router exposes its trust establishment process without authentication, implicitly assuming physical access equals authorization.
+</p>
+
+<h5>Firmware Extraction and Hard-Coded Secrets</h5>
+
+<p>
+Dumping the flash memory allowed the firmware to be analyzed independently of the hardware. Within the binary image, operational configuration data—including the WiFi password—was discovered directly embedded in persistent storage. The credential was neither encrypted nor derived dynamically; it existed as static data surrounded by erased flash regions.
+</p>
+
+<p>
+Hard-coded passwords represent more than poor implementation practice. They indicate the absence of hardware-backed secret protection. Secure embedded platforms typically derive encryption keys from immutable hardware sources such as OTP memory or secure elements, ensuring that extracted firmware alone cannot reveal usable secrets. In this device, possession of firmware directly resulted in credential recovery, demonstrating that confidentiality relied entirely on obscurity.
+</p>
+
+<h5>Modifying Execution and Secure Boot</h5>
+
+<p>
+The defining experiment involved modifying the firmware image and reflashing the device. Although the modification altered only a visible boot message, the system accepted and executed the modified firmware without resistance. No cryptographic signature verification rejected the change, and no integrity mechanism halted execution.
+</p>
+
+<p>
+This outcome demonstrates the absence of secure boot. In secure architectures, execution follows a cryptographic chain of trust beginning from immutable boot ROM code:
+</p>
+
+<pre>
+Boot ROM → Bootloader → Kernel → Operating System
+</pre>
+
+<p>
+Each stage verifies the authenticity of the next before execution proceeds. The successful boot of modified firmware shows that this chain is either missing or unenforced. The router cannot distinguish legitimate firmware from attacker-controlled firmware, meaning execution authority belongs to whoever writes the flash memory last.
+</p>
+
+<h5>The Missing Hardware Root of Trust</h5>
+
+<p>
+A hardware root of trust provides an immutable foundation from which software authenticity and device identity are derived. Without such a root, software effectively validates itself, creating a circular trust dependency vulnerable to physical modification.
+</p>
+
+<p>
+The exercises demonstrated that firmware integrity in this platform depends entirely on writable storage rather than silicon-enforced verification. As a result, both credential extraction and persistent firmware modification were possible without exploiting software vulnerabilities.
+</p>
+
+<h5>Supply Chain Implications</h5>
+
+<p>
+The implications extend beyond laboratory experimentation. Consumer networking devices frequently pass through complex manufacturing, refurbishment, and resale ecosystems. Devices lacking verified boot can be modified anywhere along this supply chain, allowing malicious firmware to be installed prior to purchase.
+</p>
+
+<p>
+Because the device performs no cryptographic verification during boot, end users have no reliable method to confirm firmware authenticity. A compromised router may operate normally while silently intercepting traffic or harvesting credentials, transforming inexpensive IoT hardware into persistent attack infrastructure.
+</p>
+
+<h5>Why Modern Platforms Resist These Attacks</h5>
+
+<p>
+Modern secure systems—including smartphones and cloud infrastructure platforms—implement hardware-enforced trust mechanisms such as immutable boot verification, device-unique cryptographic identities, hardware-derived storage encryption, and measured boot attestation.
+</p>
+
+<p>
+Under such architectures, firmware modification causes boot failure rather than execution, and extracted firmware does not expose usable secrets. The difference between these systems and the evaluated router is architectural rather than incremental: security begins in silicon.
+</p>
+
+<h5>What You Actually Accomplished</h5>
+
+<p>
+The purpose of the exercise was not simply to teach firmware dumping or binary patching. Each step evaluated a foundational security property. UART access exposed early execution trust boundaries. Flash extraction evaluated confidentiality assumptions. Hard-coded credentials revealed failures in secret management. Firmware patching tested whether execution authenticity was enforced.
+</p>
+
+<p>
+Together, these actions formed a complete trust audit of an embedded system. Rather than exploiting bugs, participants evaluated whether the platform deserved trust at all.
+</p>
+
+<h5>Looking Forward</h5>
+
+<p>
+Understanding why this device failed provides motivation to study modern secure architectures designed to prevent exactly these outcomes. Concepts such as hardware roots of trust, secure boot, device identity derivation, measured boot, and frameworks like DICE aim to ensure that systems remain trustworthy even under physical access.
+</p>
+
+<p>
+You did not merely break a router. You learned how trust fails—and why building trustworthy systems requires security anchored in hardware rather than assumptions.
+</p>
+
+        </section>
+
+
+
+      
+
+
+
+
+
+
+
+      <section class="section Top" data-section="section_end">
+        <div class="container">
+          <div class="section-heading">
+            <div class="inline-header">
+              <h2>
+                <div class="white-button">
+                  <a href="./invisible_bits.html">Next</a>
+                </div>
+              </h2>
+            </div>
+          </div>
+        
+
+      </section>
+
+
+
+
+
+    </div> 
+
+    <!-- Scripts -->
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="assets/js/isotope.min.js"></script>
+    <script src="assets/js/owl-carousel.js"></script>
+    <script src="assets/js/lightbox.js"></script>
+    <script src="assets/js/custom.js"></script>
+    <script>
+      //according to loftblog tut
+      $(".main-menu li:first").addClass("active");
+
+      var showSection = function showSection(section, isAnimate) {
+        var direction = section.replace(/#/, ""),
+          reqSection = $(".section").filter(
+            '[data-section="' + direction + '"]'
+          ),
+          reqSectionPos = reqSection.offset().top - 0;
+
+        if (isAnimate) {
+          $("body, html").animate(
+            {
+              scrollTop: reqSectionPos
+            },
+            800
+          );
+        } else {
+          $("body, html").scrollTop(reqSectionPos);
+        }
+      };
+
+      var checkSection = function checkSection() {
+        $(".section").each(function() {
+          var $this = $(this),
+            topEdge = $this.offset().top - 80,
+            bottomEdge = topEdge + $this.height(),
+            wScroll = $(window).scrollTop();
+          if (topEdge < wScroll && bottomEdge > wScroll) {
+            var currentId = $this.data("section"),
+              reqLink = $("a").filter("[href*=\\#" + currentId + "]");
+            reqLink
+              .closest("li")
+              .addClass("active")
+              .siblings()
+              .removeClass("active");
+          }
+        });
+      };
+
+      $(".main-menu").on("click", "a", function(e) {
+        e.preventDefault();
+        showSection($(this).attr("href"), true);
+      });
+
+      $(window).scroll(function() {
+        checkSection();
+      });
+    </script>
+  </body>
+</html>
